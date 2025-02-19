@@ -1,20 +1,48 @@
 pipeline {
     agent any
+
+    environment {
+        GIT_CREDENTIALS = 'de66972a-8845-4d9e-be98-39df0e181559' // Your GitHub credential ID
+    }
+
     stages {
         stage('Clone') {
             steps {
-                checkout scm
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/app']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/vishnurajrvr/codit-internship.git',
+                        credentialsId: "${GIT_CREDENTIALS}"
+                    ]]
+                ])
             }
         }
+
         stage('Build') {
             steps {
-                sh 'docker build -t webapp .'
+                bat '''
+                echo Building the project...
+                dir
+                '''
             }
         }
+
         stage('Deploy') {
             steps {
-                sh 'docker run -d -p 8070:80 webapp'
+                bat '''
+                echo Deploying the project...
+                '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
